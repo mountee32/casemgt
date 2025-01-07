@@ -1,292 +1,53 @@
-# Legal Case Management System - Technical and Functional Specification
+Legal Case Management System - Technical and Functional Specification
 
-## Overview
-A FastAPI-based REST API service for managing legal cases, providing core functionality for a legal case management system.
+1. System Overview
+   - Purpose: Manage legal cases, documents, and related entities
+   - Scope: Case tracking, document management, client management
 
-## Technical Stack
-- FastAPI framework for API development
-- SQLAlchemy ORM for database operations
-- Alembic for database migrations
-- SQLite database for data storage
-- JWT-based authentication
-- CORS middleware for cross-origin requests
+2. Core Components
+   - Models:
+     * Case: Represents a legal case with attributes (case number, parties, status)
+     * Client: Represents a client with attributes (name, contact info)
+     * Document: Represents legal documents with attributes (type, content, case reference)
 
-## Current Architecture
-- Multi-layered architecture (API, Services, Models, Database)
-- Role-based access control
-- JWT token authentication
-- Document management capabilities
-- Case management functionality
+   - API:
+     * RESTful API endpoints for CRUD operations
+     * Version: v1
+     * Endpoints: /cases, /clients, /documents
 
-## Proof of Concept (PoC) Simplification Strategy
-To prove FastAPI's suitability as a backend service, the following simplifications are recommended:
+   - Database:
+     * Alembic migrations for schema management
+     * Tables: cases, clients, documents
 
-1. Authentication Simplification
-- Remove JWT authentication and OAuth2 implementation
-- Remove password hashing and token generation
-- Keep basic user identification through simple API keys or no authentication
-- Benefits: Faster development cycles, easier testing, reduced complexity
+3. Document Management Features
+   - Document Types:
+     * Case Briefs
+     * Legal Contracts
+     * Court Filings
+   - Storage: documents directory with individual files
+   - Operations: Create, Read, Update, Delete
 
-2. Authorization Simplification
-- Remove role-based access control
-- Remove user permission checks
-- Treat all users as having full access
-- Benefits: Simplified API endpoints, clearer data flow, focused core functionality
+4. Technical Stack
+   - Backend: Python
+   - Framework: FastAPI
+   - Database: PostgreSQL
+   - Version Control: Alembic
+   - Server Configuration:
+     * Host: 0.0.0.0 (accessible from any network interface)
+     * Port: 8000
+     * Development mode with auto-reload enabled
 
-3. Data Model Simplification
-- Simplify user model (remove password hashing, roles)
-- Reduce relationship complexity
-- Keep core case and document models
-- Benefits: Easier database management, simpler queries, faster development
+5. Testing
+   - Test Plan: testplan.md
+   - Test Documents: documents/test_document.txt, documents/test_document2.txt
 
-## Core Functionality to Retain
-- Case CRUD operations
-- Document management
-- Basic user operations
-- API documentation (Swagger/OpenAPI)
-
-## Document Upload System Design
-
-### Database Schema
-1. Document Model Fields:
-   - id: Integer (Primary Key)
-   - case_id: Integer (Foreign Key to cases table)
-   - filename: String (original filename)
-   - file_path: String (path in uploads directory)
-   - file_type: String (MIME type)
-   - file_size: Integer (in bytes)
-   - upload_date: DateTime
-   - description: String (optional)
-   - metadata: JSON (for additional file metadata)
-
-2. Relationships:
-   - Many-to-One relationship with Case model (multiple documents per case)
-
-### File Storage
-1. Physical Storage:
-   - Base directory: /uploads
-   - File naming: {timestamp}_{case_id}_{original_filename}
-   - Directory structure: /uploads/{case_id}/
-   - Benefits: Easy file organization and retrieval by case
-
-2. File Upload Handling:
-   - Max file size: 50MB per file
-   - Allowed file types: PDF, DOC, DOCX, TXT, JPG, PNG
-   - Duplicate handling: Allow multiple versions with timestamp prefix
-
-### API Endpoints
-
-1. Upload Document
-```
-POST /api/v1/cases/{case_id}/documents
-Content-Type: multipart/form-data
-
-Parameters:
-- file: File (required)
-- description: String (optional)
-- metadata: JSON (optional)
-
-Response:
-{
-    "id": integer,
-    "filename": string,
-    "file_type": string,
-    "file_size": integer,
-    "upload_date": datetime,
-    "description": string,
-    "metadata": object
-}
-```
-
-2. List Case Documents
-```
-GET /api/v1/cases/{case_id}/documents
-
-Response:
-[
-    {
-        "id": integer,
-        "filename": string,
-        "file_type": string,
-        "file_size": integer,
-        "upload_date": datetime,
-        "description": string
-    }
-]
-```
-
-3. Get Document Details
-```
-GET /api/v1/documents/{document_id}
-
-Response:
-{
-    "id": integer,
-    "filename": string,
-    "file_type": string,
-    "file_size": integer,
-    "upload_date": datetime,
-    "description": string,
-    "metadata": object,
-    "case": {
-        "id": integer,
-        "case_number": string,
-        "title": string
-    }
-}
-```
-
-4. Download Document
-```
-GET /api/v1/documents/{document_id}/download
-
-Response:
-- File stream with appropriate Content-Type header
-```
-
-5. Delete Document
-```
-DELETE /api/v1/documents/{document_id}
-
-Response:
-{
-    "message": "Document successfully deleted"
-}
-```
-
-### Implementation Details
-
-1. File Upload Process:
-   - Validate file type and size
-   - Generate unique filename
-   - Create case directory if not exists
-   - Save file to filesystem
-   - Create database record
-   - Return document metadata
-
-2. Error Handling:
-   - Invalid file type
-   - File too large
-   - Case not found
-   - Storage errors
-   - Database errors
-
-3. Security Considerations:
-   - Sanitize filenames
-   - Validate file types
-   - Prevent directory traversal
-   - Secure file permissions
-
-4. Performance Optimizations:
-   - Async file operations
-   - Streaming for large files
-   - Database indexing on case_id
-   - Efficient file serving
-
-This document upload system design prioritizes simplicity while maintaining core functionality needed for the proof of concept. It can be extended with additional features like file versioning, bulk uploads, or cloud storage integration in future iterations.
-
-## Development Focus
-- API endpoint functionality
-- Data model validation
-- FastAPI feature demonstration
-- Quick iteration capability
-
-## API Testing Plan - Cases Endpoint
-
-Testing the /api/v1/cases endpoint for CRUD operations:
-
-### Required Fields for Case Creation
-- case_number (string)
-- title (string)
-- case_type (string)
-- status (string)
-
-### Optional Fields
-- court
-- jurisdiction
-- filing_date
-- description
-- practice_area
-- statute_of_limitations
-- opposing_counsel
-- judge
-- assigned_attorney_id
-- client_id
-
-### Test Cases
-
-1. CREATE Operation
-```bash
-curl -X POST http://localhost:8000/api/v1/cases/ \
--H "Content-Type: application/json" \
--d '{
-  "case_number": "2024-001",
-  "title": "Smith vs Johnson",
-  "case_type": "Civil Litigation",
-  "status": "Active"
-}'
-```
-
-2. READ Operations
-- Get all cases:
-```bash
-curl http://localhost:8000/api/v1/cases/
-```
-- Get specific case:
-```bash
-curl http://localhost:8000/api/v1/cases/1
-```
-
-3. UPDATE Operation
-```bash
-curl -X PUT http://localhost:8000/api/v1/cases/1 \
--H "Content-Type: application/json" \
--d '{
-  "status": "In Progress",
-  "court": "District Court"
-}'
-```
-
-4. DELETE Operation
-```bash
-curl -X DELETE http://localhost:8000/api/v1/cases/1
-```
-
-### Test Results
-
-All CRUD operations for the cases endpoint have been tested successfully with the following results:
-
-1. CREATE (POST /api/v1/cases/)
-- Successfully created case "2024-001: Smith vs Johnson"
-- Server accepted the request and stored the case data
-- Case was assigned ID 1 with proper timestamps
-- SQL logs confirm successful database insertion
-
-2. READ (GET /api/v1/cases/ and GET /api/v1/cases/{id})
-- Successfully retrieved list of all cases
-- Successfully retrieved individual case by ID
-- Data matched the created case exactly
-- SQL logs show proper SELECT queries executed
-
-3. UPDATE (PUT /api/v1/cases/{id})
-- Successfully updated case status from "Active" to "In Progress"
-- Added "District Court" to court field
-- Partial updates worked as expected
-- Updated timestamp reflected the changes
-- SQL logs confirm UPDATE query executed
-
-4. DELETE (DELETE /api/v1/cases/{id})
-- Successfully deleted case ID 1
-- Subsequent GET request returned 404 Not Found
-- SQL logs show proper DELETE query executed
-- Database state properly reflects deletion
-
-Conclusion: The cases API endpoint is functioning correctly for all CRUD operations with proper:
-- Data persistence in SQLite database
-- Schema validation
-- HTTP status codes
-- Error handling
-- SQL query execution
-- Timestamp management
-
-This PoC aims to demonstrate FastAPI's capabilities for building a scalable legal case management system while temporarily removing complex security and authorization features to speed up development and testing.
+6. Current State
+   - Core models implemented (case.py, client.py, document.py)
+   - API endpoints defined (api.py, endpoints/documents.py)
+   - CRUD operations implemented (crud/document.py)
+   - Document utilities implemented (file.py)
+   - Schema definitions implemented (schemas/document.py)
+   - Sample documents created:
+     * documents/case_brief_1.txt
+     * documents/legal_contract_1.txt
+     * documents/court_filing_1.txt
