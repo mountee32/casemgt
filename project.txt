@@ -51,4 +51,102 @@ To prove FastAPI's suitability as a backend service, the following simplificatio
 - FastAPI feature demonstration
 - Quick iteration capability
 
+## API Testing Plan - Cases Endpoint
+
+Testing the /api/v1/cases endpoint for CRUD operations:
+
+### Required Fields for Case Creation
+- case_number (string)
+- title (string)
+- case_type (string)
+- status (string)
+
+### Optional Fields
+- court
+- jurisdiction
+- filing_date
+- description
+- practice_area
+- statute_of_limitations
+- opposing_counsel
+- judge
+- assigned_attorney_id
+- client_id
+
+### Test Cases
+
+1. CREATE Operation
+```bash
+curl -X POST http://localhost:8000/api/v1/cases/ \
+-H "Content-Type: application/json" \
+-d '{
+  "case_number": "2024-001",
+  "title": "Smith vs Johnson",
+  "case_type": "Civil Litigation",
+  "status": "Active"
+}'
+```
+
+2. READ Operations
+- Get all cases:
+```bash
+curl http://localhost:8000/api/v1/cases/
+```
+- Get specific case:
+```bash
+curl http://localhost:8000/api/v1/cases/1
+```
+
+3. UPDATE Operation
+```bash
+curl -X PUT http://localhost:8000/api/v1/cases/1 \
+-H "Content-Type: application/json" \
+-d '{
+  "status": "In Progress",
+  "court": "District Court"
+}'
+```
+
+4. DELETE Operation
+```bash
+curl -X DELETE http://localhost:8000/api/v1/cases/1
+```
+
+### Test Results
+
+All CRUD operations for the cases endpoint have been tested successfully with the following results:
+
+1. CREATE (POST /api/v1/cases/)
+- Successfully created case "2024-001: Smith vs Johnson"
+- Server accepted the request and stored the case data
+- Case was assigned ID 1 with proper timestamps
+- SQL logs confirm successful database insertion
+
+2. READ (GET /api/v1/cases/ and GET /api/v1/cases/{id})
+- Successfully retrieved list of all cases
+- Successfully retrieved individual case by ID
+- Data matched the created case exactly
+- SQL logs show proper SELECT queries executed
+
+3. UPDATE (PUT /api/v1/cases/{id})
+- Successfully updated case status from "Active" to "In Progress"
+- Added "District Court" to court field
+- Partial updates worked as expected
+- Updated timestamp reflected the changes
+- SQL logs confirm UPDATE query executed
+
+4. DELETE (DELETE /api/v1/cases/{id})
+- Successfully deleted case ID 1
+- Subsequent GET request returned 404 Not Found
+- SQL logs show proper DELETE query executed
+- Database state properly reflects deletion
+
+Conclusion: The cases API endpoint is functioning correctly for all CRUD operations with proper:
+- Data persistence in SQLite database
+- Schema validation
+- HTTP status codes
+- Error handling
+- SQL query execution
+- Timestamp management
+
 This PoC aims to demonstrate FastAPI's capabilities for building a scalable legal case management system while temporarily removing complex security and authorization features to speed up development and testing.
