@@ -1,0 +1,54 @@
+# Legal Case Management System - Technical and Functional Specification
+
+## Overview
+A FastAPI-based REST API service for managing legal cases, providing core functionality for a legal case management system.
+
+## Technical Stack
+- FastAPI framework for API development
+- SQLAlchemy ORM for database operations
+- Alembic for database migrations
+- SQLite database for data storage
+- JWT-based authentication
+- CORS middleware for cross-origin requests
+
+## Current Architecture
+- Multi-layered architecture (API, Services, Models, Database)
+- Role-based access control
+- JWT token authentication
+- Document management capabilities
+- Case management functionality
+
+## Proof of Concept (PoC) Simplification Strategy
+To prove FastAPI's suitability as a backend service, the following simplifications are recommended:
+
+1. Authentication Simplification
+- Remove JWT authentication and OAuth2 implementation
+- Remove password hashing and token generation
+- Keep basic user identification through simple API keys or no authentication
+- Benefits: Faster development cycles, easier testing, reduced complexity
+
+2. Authorization Simplification
+- Remove role-based access control
+- Remove user permission checks
+- Treat all users as having full access
+- Benefits: Simplified API endpoints, clearer data flow, focused core functionality
+
+3. Data Model Simplification
+- Simplify user model (remove password hashing, roles)
+- Reduce relationship complexity
+- Keep core case and document models
+- Benefits: Easier database management, simpler queries, faster development
+
+## Core Functionality to Retain
+- Case CRUD operations
+- Document management
+- Basic user operations
+- API documentation (Swagger/OpenAPI)
+
+## Development Focus
+- API endpoint functionality
+- Data model validation
+- FastAPI feature demonstration
+- Quick iteration capability
+
+This PoC aims to demonstrate FastAPI's capabilities for building a scalable legal case management system while temporarily removing complex security and authorization features to speed up development and testing.
