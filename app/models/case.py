@@ -28,3 +28,6 @@ class Case(Base):
     # Optional IDs for PoC
     assigned_attorney_id = Column(Integer, nullable=True)
     client_id = Column(Integer, nullable=True)
+
+    # Relationship with documents
+    documents = relationship("Document", back_populates="case", cascade="all, delete-orphan")

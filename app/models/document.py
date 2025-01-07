@@ -1,14 +1,20 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, JSON
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
 class Document(Base):
     __tablename__ = "documents"
     
-    document_id = Column(Integer, primary_key=True, index=True)
-    case_id = Column(Integer, nullable=False)  # Removed ForeignKey for PoC
-    title = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    case_id = Column(Integer, ForeignKey("cases.case_id"), nullable=False)
+    filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
-    document_type = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    created_by = Column(Integer, nullable=False)  # Removed ForeignKey for PoC
+    file_type = Column(String, nullable=False)  # MIME type
+    file_size = Column(Integer, nullable=False)  # Size in bytes
+    upload_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    description = Column(String, nullable=True)
+    document_metadata = Column(JSON, nullable=True)
+
+    # Relationship with Case
+    case = relationship("Case", back_populates="documents")

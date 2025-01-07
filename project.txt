@@ -45,6 +45,146 @@ To prove FastAPI's suitability as a backend service, the following simplificatio
 - Basic user operations
 - API documentation (Swagger/OpenAPI)
 
+## Document Upload System Design
+
+### Database Schema
+1. Document Model Fields:
+   - id: Integer (Primary Key)
+   - case_id: Integer (Foreign Key to cases table)
+   - filename: String (original filename)
+   - file_path: String (path in uploads directory)
+   - file_type: String (MIME type)
+   - file_size: Integer (in bytes)
+   - upload_date: DateTime
+   - description: String (optional)
+   - metadata: JSON (for additional file metadata)
+
+2. Relationships:
+   - Many-to-One relationship with Case model (multiple documents per case)
+
+### File Storage
+1. Physical Storage:
+   - Base directory: /uploads
+   - File naming: {timestamp}_{case_id}_{original_filename}
+   - Directory structure: /uploads/{case_id}/
+   - Benefits: Easy file organization and retrieval by case
+
+2. File Upload Handling:
+   - Max file size: 50MB per file
+   - Allowed file types: PDF, DOC, DOCX, TXT, JPG, PNG
+   - Duplicate handling: Allow multiple versions with timestamp prefix
+
+### API Endpoints
+
+1. Upload Document
+```
+POST /api/v1/cases/{case_id}/documents
+Content-Type: multipart/form-data
+
+Parameters:
+- file: File (required)
+- description: String (optional)
+- metadata: JSON (optional)
+
+Response:
+{
+    "id": integer,
+    "filename": string,
+    "file_type": string,
+    "file_size": integer,
+    "upload_date": datetime,
+    "description": string,
+    "metadata": object
+}
+```
+
+2. List Case Documents
+```
+GET /api/v1/cases/{case_id}/documents
+
+Response:
+[
+    {
+        "id": integer,
+        "filename": string,
+        "file_type": string,
+        "file_size": integer,
+        "upload_date": datetime,
+        "description": string
+    }
+]
+```
+
+3. Get Document Details
+```
+GET /api/v1/documents/{document_id}
+
+Response:
+{
+    "id": integer,
+    "filename": string,
+    "file_type": string,
+    "file_size": integer,
+    "upload_date": datetime,
+    "description": string,
+    "metadata": object,
+    "case": {
+        "id": integer,
+        "case_number": string,
+        "title": string
+    }
+}
+```
+
+4. Download Document
+```
+GET /api/v1/documents/{document_id}/download
+
+Response:
+- File stream with appropriate Content-Type header
+```
+
+5. Delete Document
+```
+DELETE /api/v1/documents/{document_id}
+
+Response:
+{
+    "message": "Document successfully deleted"
+}
+```
+
+### Implementation Details
+
+1. File Upload Process:
+   - Validate file type and size
+   - Generate unique filename
+   - Create case directory if not exists
+   - Save file to filesystem
+   - Create database record
+   - Return document metadata
+
+2. Error Handling:
+   - Invalid file type
+   - File too large
+   - Case not found
+   - Storage errors
+   - Database errors
+
+3. Security Considerations:
+   - Sanitize filenames
+   - Validate file types
+   - Prevent directory traversal
+   - Secure file permissions
+
+4. Performance Optimizations:
+   - Async file operations
+   - Streaming for large files
+   - Database indexing on case_id
+   - Efficient file serving
+
+This document upload system design prioritizes simplicity while maintaining core functionality needed for the proof of concept. It can be extended with additional features like file versioning, bulk uploads, or cloud storage integration in future iterations.
+
 ## Development Focus
 - API endpoint functionality
 - Data model validation
